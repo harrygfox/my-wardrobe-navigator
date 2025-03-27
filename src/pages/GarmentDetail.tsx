@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, ArrowRight, Camera, Copy, Save } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Camera, Copy, Edit, Save } from 'lucide-react';
 import { Garment } from '@/components/GarmentCard';
 
 const mockGarments: Garment[] = [
@@ -81,6 +81,7 @@ const GarmentDetail: React.FC = () => {
   });
   const [userImage, setUserImage] = useState<string | null>(null);
   const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     // In a real app, fetch garment data from API
@@ -131,7 +132,7 @@ const GarmentDetail: React.FC = () => {
   };
 
   const handleToggleFitAssistant = (checked: boolean) => {
-    if (garment) {
+    if (garment && isEditing) {
       setGarment({
         ...garment,
         teachFitAssistant: checked
@@ -145,6 +146,7 @@ const GarmentDetail: React.FC = () => {
       title: "Changes Saved",
       description: "Your garment details have been updated.",
     });
+    setIsEditing(false);
   };
 
   const handleDuplicate = () => {
@@ -154,17 +156,64 @@ const GarmentDetail: React.FC = () => {
     });
   };
 
+  const toggleEditMode = () => {
+    setIsEditing(!isEditing);
+    if (!isEditing) {
+      toast({
+        title: "Edit Mode",
+        description: "You can now edit the garment details.",
+      });
+    }
+  };
+
+  // Function to render measurement in read-only mode
+  const renderReadOnlyMeasurement = (label: string, value: number | undefined) => {
+    if (value === undefined) return null;
+    
+    return (
+      <div className="flex justify-between items-center py-3 border-b border-gray-100">
+        <span className="text-sm font-medium">{label}</span>
+        <span className="text-sm font-semibold px-3 py-1 bg-gray-50 rounded-md">
+          {value} cm
+        </span>
+      </div>
+    );
+  };
+
+  // Function to render fit perception in read-only mode
+  const renderReadOnlyFitPerception = (label: string, value: string) => {
+    return (
+      <div className="flex justify-between items-center py-3 border-b border-gray-100">
+        <span className="text-sm font-medium">{label} Fit</span>
+        <span className="text-sm font-semibold px-3 py-1 bg-gray-50 rounded-md">
+          {value}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-brand-background">
       <Header />
       
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-screen-lg mx-auto">
-          <div className="flex items-center mb-8 animate-fade-in">
-            <Link to="/" className="text-brand-muted hover:text-brand-primary transition-colors mr-4">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <h1 className="font-heading text-3xl">{garment.name}</h1>
+          <div className="flex items-center justify-between mb-8 animate-fade-in">
+            <div className="flex items-center">
+              <Link to="/" className="text-brand-muted hover:text-brand-primary transition-colors mr-4">
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <h1 className="font-heading text-3xl">{garment.name}</h1>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleEditMode}
+              className="flex items-center gap-1"
+            >
+              <Edit className="w-4 h-4" />
+              <span>{isEditing ? "Cancel Edit" : "Edit"}</span>
+            </Button>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
@@ -198,6 +247,7 @@ const GarmentDetail: React.FC = () => {
                     id="fit-assistant-detail"
                     checked={garment.teachFitAssistant}
                     onCheckedChange={handleToggleFitAssistant}
+                    disabled={!isEditing}
                   />
                   <div>
                     <Label 
@@ -219,35 +269,45 @@ const GarmentDetail: React.FC = () => {
               <div className="glass-panel p-6">
                 <h2 className="font-heading text-xl mb-6">Measurements</h2>
                 <div className="space-y-5">
-                  {garment.measurements.chest !== undefined && (
-                    <FitSlider
-                      label="Chest"
-                      value={garment.measurements.chest}
-                      onChange={(value) => handleMeasurementChange('chest', value)}
-                      min={60}
-                      max={140}
-                      measurementType="measurement"
-                    />
-                  )}
-                  {garment.measurements.waist !== undefined && (
-                    <FitSlider
-                      label="Waist"
-                      value={garment.measurements.waist}
-                      onChange={(value) => handleMeasurementChange('waist', value)}
-                      min={50}
-                      max={140}
-                      measurementType="measurement"
-                    />
-                  )}
-                  {garment.measurements.hip !== undefined && (
-                    <FitSlider
-                      label="Hip"
-                      value={garment.measurements.hip}
-                      onChange={(value) => handleMeasurementChange('hip', value)}
-                      min={60}
-                      max={150}
-                      measurementType="measurement"
-                    />
+                  {isEditing ? (
+                    <>
+                      {garment.measurements.chest !== undefined && (
+                        <FitSlider
+                          label="Chest"
+                          value={garment.measurements.chest}
+                          onChange={(value) => handleMeasurementChange('chest', value)}
+                          min={60}
+                          max={140}
+                          measurementType="measurement"
+                        />
+                      )}
+                      {garment.measurements.waist !== undefined && (
+                        <FitSlider
+                          label="Waist"
+                          value={garment.measurements.waist}
+                          onChange={(value) => handleMeasurementChange('waist', value)}
+                          min={50}
+                          max={140}
+                          measurementType="measurement"
+                        />
+                      )}
+                      {garment.measurements.hip !== undefined && (
+                        <FitSlider
+                          label="Hip"
+                          value={garment.measurements.hip}
+                          onChange={(value) => handleMeasurementChange('hip', value)}
+                          min={60}
+                          max={150}
+                          measurementType="measurement"
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {renderReadOnlyMeasurement("Chest", garment.measurements.chest)}
+                      {renderReadOnlyMeasurement("Waist", garment.measurements.waist)}
+                      {renderReadOnlyMeasurement("Hip", garment.measurements.hip)}
+                    </>
                   )}
                 </div>
               </div>
@@ -255,61 +315,76 @@ const GarmentDetail: React.FC = () => {
               <div className="glass-panel p-6">
                 <h2 className="font-heading text-xl mb-6">Fit Perception</h2>
                 <div className="space-y-4">
-                  {garment.measurements.chest !== undefined && (
-                    <div className="space-y-2">
-                      <Label htmlFor="chest-fit" className="text-sm">Chest Fit</Label>
-                      <Select
-                        value={fitPerception.chest}
-                        onValueChange={(value) => handleFitPerceptionChange('chest', value)}
-                      >
-                        <SelectTrigger id="chest-fit" className="input-field">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {fitOptions.map((option) => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  
-                  {garment.measurements.waist !== undefined && (
-                    <div className="space-y-2">
-                      <Label htmlFor="waist-fit" className="text-sm">Waist Fit</Label>
-                      <Select
-                        value={fitPerception.waist}
-                        onValueChange={(value) => handleFitPerceptionChange('waist', value)}
-                      >
-                        <SelectTrigger id="waist-fit" className="input-field">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {fitOptions.map((option) => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  
-                  {garment.measurements.hip !== undefined && (
-                    <div className="space-y-2">
-                      <Label htmlFor="hip-fit" className="text-sm">Hip Fit</Label>
-                      <Select
-                        value={fitPerception.hip}
-                        onValueChange={(value) => handleFitPerceptionChange('hip', value)}
-                      >
-                        <SelectTrigger id="hip-fit" className="input-field">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {fitOptions.map((option) => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  {isEditing ? (
+                    <>
+                      {garment.measurements.chest !== undefined && (
+                        <div className="space-y-2">
+                          <Label htmlFor="chest-fit" className="text-sm">Chest Fit</Label>
+                          <Select
+                            value={fitPerception.chest}
+                            onValueChange={(value) => handleFitPerceptionChange('chest', value)}
+                          >
+                            <SelectTrigger id="chest-fit" className="input-field">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {fitOptions.map((option) => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      
+                      {garment.measurements.waist !== undefined && (
+                        <div className="space-y-2">
+                          <Label htmlFor="waist-fit" className="text-sm">Waist Fit</Label>
+                          <Select
+                            value={fitPerception.waist}
+                            onValueChange={(value) => handleFitPerceptionChange('waist', value)}
+                          >
+                            <SelectTrigger id="waist-fit" className="input-field">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {fitOptions.map((option) => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      
+                      {garment.measurements.hip !== undefined && (
+                        <div className="space-y-2">
+                          <Label htmlFor="hip-fit" className="text-sm">Hip Fit</Label>
+                          <Select
+                            value={fitPerception.hip}
+                            onValueChange={(value) => handleFitPerceptionChange('hip', value)}
+                          >
+                            <SelectTrigger id="hip-fit" className="input-field">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {fitOptions.map((option) => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {garment.measurements.chest !== undefined && 
+                        renderReadOnlyFitPerception("Chest", fitPerception.chest)}
+                      
+                      {garment.measurements.waist !== undefined && 
+                        renderReadOnlyFitPerception("Waist", fitPerception.waist)}
+                      
+                      {garment.measurements.hip !== undefined && 
+                        renderReadOnlyFitPerception("Hip", fitPerception.hip)}
+                    </>
                   )}
                 </div>
               </div>
@@ -333,6 +408,7 @@ const GarmentDetail: React.FC = () => {
                         size="sm"
                         className="absolute bottom-2 right-2 bg-white/80 backdrop-blur-sm"
                         onClick={() => document.getElementById('user-image-upload')?.click()}
+                        disabled={!isEditing}
                       >
                         <Camera className="h-4 w-4 mr-1" />
                         Change
@@ -340,11 +416,11 @@ const GarmentDetail: React.FC = () => {
                     </div>
                   ) : (
                     <div 
-                      className="w-full aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
-                      onClick={() => document.getElementById('user-image-upload')?.click()}
+                      className={`w-full aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center ${isEditing ? "cursor-pointer hover:bg-gray-200" : ""} transition-colors`}
+                      onClick={() => isEditing && document.getElementById('user-image-upload')?.click()}
                     >
                       <Camera className="h-8 w-8 text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-500">Add Photo</p>
+                      <p className="text-sm text-gray-500">{isEditing ? "Add Photo" : "No Photo"}</p>
                     </div>
                   )}
                   <input
@@ -353,6 +429,7 @@ const GarmentDetail: React.FC = () => {
                     accept="image/*"
                     onChange={handleUserImageChange}
                     className="hidden"
+                    disabled={!isEditing}
                   />
                 </div>
               </div>
@@ -383,14 +460,23 @@ const GarmentDetail: React.FC = () => {
           
           <div className="flex flex-wrap justify-between items-center border-t border-gray-200 pt-6 mt-8">
             <div className="flex gap-4 mb-4 md:mb-0">
-              <Button variant="outline" onClick={handleDuplicate} className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleDuplicate} 
+                className="flex items-center gap-2"
+              >
                 <Copy className="w-4 h-4" />
                 <span>Duplicate</span>
               </Button>
-              <Button onClick={handleSaveChanges} className="flex items-center gap-2">
-                <Save className="w-4 h-4" />
-                <span>Save Changes</span>
-              </Button>
+              {isEditing && (
+                <Button 
+                  onClick={handleSaveChanges} 
+                  className="flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save Changes</span>
+                </Button>
+              )}
             </div>
             
             <div className="flex gap-4">
