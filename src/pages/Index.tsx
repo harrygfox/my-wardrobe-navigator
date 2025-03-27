@@ -1,14 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
-import MeasurementPanel from '@/components/MeasurementPanel';
-import GarmentCard, { Garment } from '@/components/GarmentCard';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import GarmentForm from '@/components/GarmentForm';
+import MeasurementCard from '@/components/MeasurementCard';
+import GarmentList from '@/components/GarmentList';
+import { Garment } from '@/components/GarmentCard';
+import DeleteGarmentDialog from '@/components/DeleteGarmentDialog';
+import AddGarmentDialog from '@/components/AddGarmentDialog';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle } from 'lucide-react';
 
 const initialGarments: Garment[] = [
   {
@@ -141,75 +139,30 @@ const Index: React.FC = () => {
             </p>
           </section>
           
-          <section className="mb-12">
-            <MeasurementPanel />
+          <section className="mb-8 max-w-xs mx-auto">
+            <MeasurementCard />
           </section>
           
-          <section className="mb-20">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="font-heading text-2xl md:text-3xl">Garments</h2>
-              <Button onClick={() => setIsAddDialogOpen(true)} className="flex items-center gap-2">
-                <PlusCircle className="w-4 h-4" />
-                <span>Add Garment</span>
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {garments.map((garment) => (
-                <GarmentCard
-                  key={garment.id}
-                  garment={garment}
-                  onToggleFitAssistant={handleToggleFitAssistant}
-                  onDelete={handleDeleteGarment}
-                />
-              ))}
-              
-              {garments.length === 0 && (
-                <div className="col-span-full py-16 text-center">
-                  <p className="text-brand-muted mb-4">Your closet is empty</p>
-                  <Button 
-                    onClick={() => setIsAddDialogOpen(true)} 
-                    variant="outline"
-                    className="border-dashed"
-                  >
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Add your first garment
-                  </Button>
-                </div>
-              )}
-            </div>
-          </section>
+          <GarmentList 
+            garments={garments}
+            onToggleFitAssistant={handleToggleFitAssistant}
+            onDeleteGarment={handleDeleteGarment}
+            onAddGarmentClick={() => setIsAddDialogOpen(true)}
+          />
         </div>
       </main>
       
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle className="font-heading text-2xl">Add New Garment</DialogTitle>
-          </DialogHeader>
-          <GarmentForm 
-            onSubmit={handleAddGarment} 
-            onCancel={() => setIsAddDialogOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      <AddGarmentDialog 
+        isOpen={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSubmit={handleAddGarment}
+      />
       
-      <AlertDialog open={!!deleteGarmentId} onOpenChange={(open) => !open && setDeleteGarmentId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to remove this garment from your closet? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteGarmentDialog 
+        isOpen={!!deleteGarmentId}
+        onOpenChange={(open) => !open && setDeleteGarmentId(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 };
