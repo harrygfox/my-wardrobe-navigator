@@ -14,6 +14,10 @@ const AddGarmentDialog: React.FC<AddGarmentDialogProps> = ({
   onOpenChange,
   onSubmit
 }) => {
+  const handleCancel = () => {
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl overflow-y-auto max-h-[90vh]">
@@ -22,7 +26,7 @@ const AddGarmentDialog: React.FC<AddGarmentDialogProps> = ({
         </DialogHeader>
         <GarmentForm 
           onSubmit={onSubmit} 
-          onCancel={() => onOpenChange(false)}
+          onCancel={handleCancel}
         />
       </DialogContent>
     </Dialog>

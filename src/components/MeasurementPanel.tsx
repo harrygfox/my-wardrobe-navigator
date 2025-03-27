@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
-import FitSlider from './FitSlider';
 import { Button } from '@/components/ui/button';
 import { useUnit } from '@/contexts/UnitContext';
-import AddMeasurementModal from './AddMeasurementModal';
-import { PlusCircle } from 'lucide-react';
+import MeasurementModal from './MeasurementModal';
+import { useToast } from '@/hooks/use-toast';
 
 export type Measurement = {
   id: string;
@@ -35,63 +33,35 @@ export const additionalMeasurements: Measurement[] = [
 const MeasurementPanel: React.FC = () => {
   const [measurements, setMeasurements] = useState<Measurement[]>(defaultMeasurements);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { unitSystem } = useUnit();
+  const { toast } = useToast();
 
-  const handleMeasurementChange = (id: string, newValue: number) => {
-    setMeasurements(prev => 
-      prev.map(m => m.id === id ? { ...m, value: newValue } : m)
-    );
+  const handleSaveMeasurements = (updatedMeasurements: Measurement[]) => {
+    setMeasurements(updatedMeasurements);
   };
-
-  const handleAddMeasurement = (selectedIds: string[]) => {
-    // Filter out measurements that are already added
-    const currentIds = measurements.map(m => m.id);
-    const newMeasurementsToAdd = additionalMeasurements
-      .filter(m => selectedIds.includes(m.id) && !currentIds.includes(m.id));
-    
-    setMeasurements(prev => [...prev, ...newMeasurementsToAdd]);
-    setIsModalOpen(false);
-  };
-
-  // Filter out measurements that are already added for the modal
-  const availableMeasurements = additionalMeasurements.filter(
-    m => !measurements.some(existing => existing.id === m.id)
-  );
 
   return (
-    <div className="glass-panel p-6 animate-fade-in">
-      <h2 className="font-heading text-xl mb-6">My Measurements</h2>
+    <div className="animate-fade-in">
+      <Button 
+        variant="outline" 
+        className="w-full h-auto py-6 flex flex-col items-center justify-center gap-2 border-dashed"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <img 
+          src="/lovable-uploads/1abc69ff-bebf-46dc-8bf4-aff0d2654e90.png" 
+          alt="Mannequin" 
+          className="h-32 mb-2" 
+        />
+        <span className="text-base font-medium">My Body Measurements</span>
+        <span className="text-xs text-muted-foreground">
+          {measurements.length} measurements saved
+        </span>
+      </Button>
       
-      <div className="space-y-6">
-        {measurements.map((measurement) => (
-          <FitSlider
-            key={measurement.id}
-            label={measurement.name}
-            value={measurement.value}
-            onChange={(newValue) => handleMeasurementChange(measurement.id, newValue)}
-            min={measurement.min}
-            max={measurement.max}
-            measurementType={measurement.type}
-          />
-        ))}
-      </div>
-      
-      {availableMeasurements.length > 0 && (
-        <Button 
-          variant="outline" 
-          className="mt-6 w-full flex items-center justify-center gap-2 border-dashed"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <PlusCircle className="w-4 h-4" />
-          <span>Add a Measurement</span>
-        </Button>
-      )}
-      
-      <AddMeasurementModal
+      <MeasurementModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAddMeasurements={handleAddMeasurement}
-        availableMeasurements={availableMeasurements}
+        onSave={handleSaveMeasurements}
+        initialMeasurements={measurements}
       />
     </div>
   );

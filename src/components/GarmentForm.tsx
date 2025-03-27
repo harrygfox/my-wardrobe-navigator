@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useUnit } from '@/contexts/UnitContext';
 import FitSlider from './FitSlider';
 import { Button } from '@/components/ui/button';
@@ -6,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Camera, Upload } from 'lucide-react';
+import { Camera, Upload, ChevronDown, ChevronUp, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import CancelConfirmationDialog from './CancelConfirmationDialog';
 
 interface GarmentFormProps {
   onSubmit: (data: any) => void;
@@ -27,9 +29,9 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
     size: '',
     color: '',
     measurements: {
-      chest: 90,
-      waist: 75,
-      hip: 95
+      chest: undefined,
+      waist: undefined,
+      hip: undefined
     },
     fitPerception: {
       chest: 'Just Right',
@@ -44,8 +46,32 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
 }) => {
   const [formData, setFormData] = useState(initialData);
   const [imagePreview, setImagePreview] = useState(initialData.image || '');
-  const { unitSystem } = useUnit();
+  const { unitSystem, toggleUnitSystem } = useUnit();
   const { toast } = useToast();
+  const [showMeasurements, setShowMeasurements] = useState(
+    Object.values(initialData.measurements).some(value => value !== undefined)
+  );
+  const [showFitPerception, setShowFitPerception] = useState(
+    isEdit || (initialData.measurements.chest !== undefined || 
+               initialData.measurements.waist !== undefined || 
+               initialData.measurements.hip !== undefined)
+  );
+  const [hasChanges, setHasChanges] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  useEffect(() => {
+    // Track if user has made any changes to the form
+    setHasChanges(
+      formData.name !== initialData.name ||
+      formData.brand !== initialData.brand ||
+      formData.size !== initialData.size ||
+      formData.color !== initialData.color ||
+      formData.image !== initialData.image ||
+      JSON.stringify(formData.measurements) !== JSON.stringify(initialData.measurements) ||
+      JSON.stringify(formData.fitPerception) !== JSON.stringify(initialData.fitPerception) ||
+      formData.teachFitAssistant !== initialData.teachFitAssistant
+    );
+  }, [formData, initialData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -108,8 +134,36 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
     onSubmit(formData);
   };
 
+  const handleCancelClick = () => {
+    if (hasChanges) {
+      setShowCancelDialog(true);
+    } else if (onCancel) {
+      onCancel();
+    }
+  };
+
+  const handleConfirmCancel = () => {
+    setShowCancelDialog(false);
+    if (onCancel) {
+      onCancel();
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8 animate-fade-in">
+      <div className="flex justify-end">
+        <div className="flex items-center space-x-2">
+          <Label htmlFor="unit-toggle-form" className="text-sm text-brand-muted">
+            {unitSystem === 'metric' ? 'Metric' : 'Imperial'}
+          </Label>
+          <Switch
+            id="unit-toggle-form"
+            checked={unitSystem === 'imperial'}
+            onCheckedChange={toggleUnitSystem}
+          />
+        </div>
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-6">
           <div className="space-y-4">
@@ -155,7 +209,7 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
 
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="brand">Brand</Label>
+              <Label htmlFor="brand">Brand*</Label>
               <Select
                 value={formData.brand}
                 onValueChange={(value) => handleSelectChange('brand', value)}
@@ -188,7 +242,7 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Name*</Label>
               <Input
                 id="name"
                 name="name"
@@ -201,7 +255,7 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="size">Size</Label>
+                <Label htmlFor="size">Size*</Label>
                 <Input
                   id="size"
                   name="size"
@@ -212,7 +266,7 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="color">Color</Label>
+                <Label htmlFor="color">Color*</Label>
                 <Input
                   id="color"
                   name="color"
@@ -228,61 +282,88 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
 
         <div className="space-y-6">
           <div className="space-y-4">
-            <Label className="text-base">Garment Measurements</Label>
-            <div className="space-y-5">
-              <FitSlider
-                label="Chest"
-                value={formData.measurements.chest}
-                onChange={(value) => handleMeasurementChange('chest', value)}
-                min={60}
-                max={140}
-                measurementType="measurement"
-              />
-              <FitSlider
-                label="Waist"
-                value={formData.measurements.waist}
-                onChange={(value) => handleMeasurementChange('waist', value)}
-                min={50}
-                max={140}
-                measurementType="measurement"
-              />
-              <FitSlider
-                label="Hip"
-                value={formData.measurements.hip}
-                onChange={(value) => handleMeasurementChange('hip', value)}
-                min={60}
-                max={150}
-                measurementType="measurement"
-              />
-            </div>
+            <button
+              type="button"
+              className={`w-full border ${showMeasurements ? 'border-gray-200 shadow-sm' : 'border-dashed border-gray-300'} rounded-lg p-4 flex justify-between items-center bg-white`}
+              onClick={() => setShowMeasurements(!showMeasurements)}
+            >
+              <span className="font-medium text-base">
+                {showMeasurements ? "Garment Measurements" : "Add precise measurements"}
+              </span>
+              {showMeasurements ? <ChevronUp className="h-5 w-5" /> : <PlusCircle className="h-5 w-5" />}
+            </button>
+            
+            {showMeasurements && (
+              <div className="space-y-5 p-4 border border-gray-100 rounded-lg bg-gray-50">
+                <FitSlider
+                  label="Chest"
+                  value={formData.measurements.chest || 90}
+                  onChange={(value) => handleMeasurementChange('chest', value)}
+                  min={60}
+                  max={140}
+                  measurementType="measurement"
+                />
+                <FitSlider
+                  label="Waist"
+                  value={formData.measurements.waist || 75}
+                  onChange={(value) => handleMeasurementChange('waist', value)}
+                  min={50}
+                  max={140}
+                  measurementType="measurement"
+                />
+                <FitSlider
+                  label="Hip"
+                  value={formData.measurements.hip || 95}
+                  onChange={(value) => handleMeasurementChange('hip', value)}
+                  min={60}
+                  max={150}
+                  measurementType="measurement"
+                />
+              </div>
+            )}
           </div>
 
           <div className="space-y-4">
-            <Label className="text-base">Fit Perception</Label>
-            <div className="grid grid-cols-1 gap-4">
-              {['chest', 'waist', 'hip'].map((part) => (
-                <div key={part} className="space-y-2">
-                  <Label htmlFor={`fit-${part}`} className="capitalize text-sm">
-                    {part} Fit
-                  </Label>
-                  <Select
-                    value={formData.fitPerception[part as 'chest' | 'waist' | 'hip']}
-                    onValueChange={(value) => 
-                      handleFitPerceptionChange(part as 'chest' | 'waist' | 'hip', value)
-                    }
-                  >
-                    <SelectTrigger id={`fit-${part}`} className="input-field">
-                      <SelectValue placeholder={`Select ${part} fit`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fitOptions.map((option) => (
-                        <SelectItem key={option} value={option}>{option}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))}
-            </div>
+            <button
+              type="button"
+              className={`w-full border ${showFitPerception ? 'border-gray-200 shadow-sm' : 'border-dashed border-gray-300'} rounded-lg p-4 flex justify-between items-center bg-white`}
+              onClick={() => setShowFitPerception(!showFitPerception)}
+              disabled={!showMeasurements}
+            >
+              <span className="font-medium text-base">
+                {showFitPerception ? "Fit Perception" : "How does it fit?"}
+              </span>
+              {showFitPerception ? <ChevronUp className="h-5 w-5" /> : <PlusCircle className="h-5 w-5" />}
+            </button>
+            
+            {showFitPerception && showMeasurements && (
+              <div className="grid grid-cols-1 gap-4 p-4 border border-gray-100 rounded-lg bg-gray-50">
+                {['chest', 'waist', 'hip'].map((part) => (
+                  formData.measurements[part as keyof typeof formData.measurements] !== undefined && (
+                    <div key={part} className="space-y-2">
+                      <Label htmlFor={`fit-${part}`} className="capitalize text-sm">
+                        {part} Fit
+                      </Label>
+                      <Select
+                        value={formData.fitPerception[part as 'chest' | 'waist' | 'hip']}
+                        onValueChange={(value) => 
+                          handleFitPerceptionChange(part as 'chest' | 'waist' | 'hip', value)
+                        }
+                      >
+                        <SelectTrigger id={`fit-${part}`} className="input-field">
+                          <SelectValue placeholder={`Select ${part} fit`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {fitOptions.map((option) => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="pt-4">
@@ -309,13 +390,19 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={handleCancelClick}>
           Cancel
         </Button>
         <Button type="submit">
           {isEdit ? 'Save Changes' : 'Add Garment'}
         </Button>
       </div>
+
+      <CancelConfirmationDialog 
+        isOpen={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        onConfirm={handleConfirmCancel}
+      />
     </form>
   );
 };

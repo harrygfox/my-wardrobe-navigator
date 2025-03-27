@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
 import FitSlider from '@/components/FitSlider';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight, Camera, Copy, Edit, Save } from 'lucide-react';
 import { Garment } from '@/components/GarmentCard';
+import { useUnit } from '@/contexts/UnitContext';
 
 const mockGarments: Garment[] = [
   {
@@ -73,6 +73,7 @@ const fitOptions = ['Very Loose', 'Loose', 'Just Right', 'Snug', 'Very Tight'];
 const GarmentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [garment, setGarment] = useState<Garment | null>(null);
   const [fitPerception, setFitPerception] = useState({
     chest: 'Just Right',
@@ -82,16 +83,21 @@ const GarmentDetail: React.FC = () => {
   const [userImage, setUserImage] = useState<string | null>(null);
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const { unitSystem, toggleUnitSystem } = useUnit();
 
   useEffect(() => {
-    // In a real app, fetch garment data from API
     const foundGarment = mockGarments.find(g => g.id === id);
     if (foundGarment) {
       setGarment(foundGarment);
     } else {
       navigate('/');
     }
-  }, [id, navigate]);
+    
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('edit') === 'true') {
+      setIsEditing(true);
+    }
+  }, [id, navigate, location]);
 
   if (!garment) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
@@ -141,12 +147,12 @@ const GarmentDetail: React.FC = () => {
   };
 
   const handleSaveChanges = () => {
-    // Here you would save changes to your data source
     toast({
       title: "Changes Saved",
       description: "Your garment details have been updated.",
     });
     setIsEditing(false);
+    navigate(`/garment/${id}`, { replace: true });
   };
 
   const handleDuplicate = () => {
@@ -157,16 +163,20 @@ const GarmentDetail: React.FC = () => {
   };
 
   const toggleEditMode = () => {
-    setIsEditing(!isEditing);
-    if (!isEditing) {
+    const newEditingState = !isEditing;
+    setIsEditing(newEditingState);
+    
+    if (newEditingState) {
+      navigate(`/garment/${id}?edit=true`, { replace: true });
       toast({
         title: "Edit Mode",
         description: "You can now edit the garment details.",
       });
+    } else {
+      navigate(`/garment/${id}`, { replace: true });
     }
   };
 
-  // Function to render measurement in read-only mode
   const renderReadOnlyMeasurement = (label: string, value: number | undefined) => {
     if (value === undefined) return null;
     
@@ -180,7 +190,6 @@ const GarmentDetail: React.FC = () => {
     );
   };
 
-  // Function to render fit perception in read-only mode
   const renderReadOnlyFitPerception = (label: string, value: string) => {
     return (
       <div className="flex justify-between items-center py-3 border-b border-gray-100">
@@ -205,25 +214,53 @@ const GarmentDetail: React.FC = () => {
               </Link>
               <h1 className="font-heading text-3xl">{garment.name}</h1>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={toggleEditMode}
-              className="flex items-center gap-1"
-            >
-              <Edit className="w-4 h-4" />
-              <span>{isEditing ? "Cancel Edit" : "Edit"}</span>
-            </Button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="unit-toggle-detail" className="text-sm text-brand-muted">
+                  {unitSystem === 'metric' ? 'Metric' : 'Imperial'}
+                </Label>
+                <Switch
+                  id="unit-toggle-detail"
+                  checked={unitSystem === 'imperial'}
+                  onCheckedChange={toggleUnitSystem}
+                />
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={toggleEditMode}
+                className="flex items-center gap-1"
+              >
+                <Edit className="w-4 h-4" />
+                <span>{isEditing ? "Cancel Edit" : "Edit"}</span>
+              </Button>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
-            {/* Left Column - Image and Info */}
             <div className="lg:col-span-2 space-y-6 animate-fade-in">
-              <div className="aspect-[3/4] rounded-xl overflow-hidden bg-white shadow-card">
-                <img
-                  src={garment.image}
-                  alt={garment.name}
-                  className="w-full h-full object-cover"
+              <div 
+                className="aspect-[3/4] rounded-xl overflow-hidden bg-white shadow-card cursor-pointer"
+                onClick={() => document.getElementById('garment-image-upload')?.click()}
+              >
+                {garment.image ? (
+                  <img
+                    src={garment.image}
+                    alt={garment.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full flex flex-col items-center justify-center bg-gray-100">
+                    <Camera className="h-12 w-12 text-gray-400 mb-3" />
+                    <p className="text-sm text-gray-500">Click to add image</p>
+                  </div>
+                )}
+                <input
+                  id="garment-image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleUserImageChange}
+                  className="hidden"
                 />
               </div>
               
@@ -264,7 +301,6 @@ const GarmentDetail: React.FC = () => {
               </div>
             </div>
             
-            {/* Middle Column - Measurements and Fit */}
             <div className="lg:col-span-2 space-y-6 animate-fade-in animation-delay-100">
               <div className="glass-panel p-6">
                 <h2 className="font-heading text-xl mb-6">Measurements</h2>
@@ -390,7 +426,6 @@ const GarmentDetail: React.FC = () => {
               </div>
             </div>
             
-            {/* Right Column - User Photo and Outfit Suggestions */}
             <div className="lg:col-span-1 space-y-6 animate-fade-in animation-delay-200">
               <div className="glass-panel p-6">
                 <h2 className="font-heading text-lg mb-4">How It Looks On Me</h2>
@@ -408,7 +443,6 @@ const GarmentDetail: React.FC = () => {
                         size="sm"
                         className="absolute bottom-2 right-2 bg-white/80 backdrop-blur-sm"
                         onClick={() => document.getElementById('user-image-upload')?.click()}
-                        disabled={!isEditing}
                       >
                         <Camera className="h-4 w-4 mr-1" />
                         Change
@@ -416,11 +450,11 @@ const GarmentDetail: React.FC = () => {
                     </div>
                   ) : (
                     <div 
-                      className={`w-full aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center ${isEditing ? "cursor-pointer hover:bg-gray-200" : ""} transition-colors`}
-                      onClick={() => isEditing && document.getElementById('user-image-upload')?.click()}
+                      className="w-full aspect-square bg-gray-100 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
+                      onClick={() => document.getElementById('user-image-upload')?.click()}
                     >
                       <Camera className="h-8 w-8 text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-500">{isEditing ? "Add Photo" : "No Photo"}</p>
+                      <p className="text-sm text-gray-500">Add Photo</p>
                     </div>
                   )}
                   <input
@@ -429,7 +463,6 @@ const GarmentDetail: React.FC = () => {
                     accept="image/*"
                     onChange={handleUserImageChange}
                     className="hidden"
-                    disabled={!isEditing}
                   />
                 </div>
               </div>
