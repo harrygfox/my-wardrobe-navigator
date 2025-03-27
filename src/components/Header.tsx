@@ -13,7 +13,7 @@ const Header: React.FC = () => {
             </h1>
           </Link>
           <span className="text-xs py-1 px-2 bg-brand-accent/10 text-brand-accent rounded-full">
-            Beta
+            Beta v1.0.1
           </span>
         </div>
       </div>
