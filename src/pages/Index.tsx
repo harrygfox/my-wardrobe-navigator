@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import MeasurementPanel from '@/components/MeasurementPanel';
@@ -186,7 +187,10 @@ const Index: React.FC = () => {
           <DialogHeader>
             <DialogTitle className="font-heading text-2xl">Add New Garment</DialogTitle>
           </DialogHeader>
-          <GarmentForm onSubmit={handleAddGarment} />
+          <GarmentForm 
+            onSubmit={handleAddGarment} 
+            onCancel={() => setIsAddDialogOpen(false)}
+          />
         </DialogContent>
       </Dialog>
       

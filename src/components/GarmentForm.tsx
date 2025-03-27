@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useUnit } from '@/contexts/UnitContext';
 import FitSlider from './FitSlider';
@@ -14,6 +13,7 @@ interface GarmentFormProps {
   onSubmit: (data: any) => void;
   initialData?: any;
   isEdit?: boolean;
+  onCancel?: () => void;
 }
 
 const brandOptions = ['Brand A', 'Brand B', 'Brand C', 'Brand D', 'Brand E', 'Brand F'];
@@ -39,7 +39,8 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
     teachFitAssistant: false,
     image: ''
   }, 
-  isEdit = false 
+  isEdit = false,
+  onCancel
 }) => {
   const [formData, setFormData] = useState(initialData);
   const [imagePreview, setImagePreview] = useState(initialData.image || '');
@@ -110,7 +111,6 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-8 animate-fade-in">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Left Column - Image Upload and Main Info */}
         <div className="space-y-6">
           <div className="space-y-4">
             <Label className="text-base">Garment Image</Label>
@@ -226,7 +226,6 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
           </div>
         </div>
 
-        {/* Right Column - Measurements and Fit */}
         <div className="space-y-6">
           <div className="space-y-4">
             <Label className="text-base">Garment Measurements</Label>
@@ -310,7 +309,7 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
-        <Button type="button" variant="outline">
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button type="submit">
