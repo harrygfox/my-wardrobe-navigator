@@ -12,8 +12,8 @@ const Header: React.FC = () => {
               My Closet
             </h1>
           </Link>
-          <span className="text-xs py-1 px-2 bg-brand-accent/10 text-brand-accent rounded-full">
-            Beta v1.0.2
+          <span className="text-xs py-1 px-2 bg-brand-accent/10 text-brand-accent rounded-full font-bold">
+            Beta v1.0.3
           </span>
         </div>
       </div>
