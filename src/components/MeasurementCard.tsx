@@ -4,9 +4,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Card } from '@/components/ui/card';
 import { Ruler } from 'lucide-react';
 import MeasurementPanel from './MeasurementPanel';
+import { useMeasurements } from '@/contexts/MeasurementContext';
 
 const MeasurementCard: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { measurements } = useMeasurements();
 
   return (
     <>
@@ -25,7 +27,9 @@ const MeasurementCard: React.FC = () => {
               <Ruler className="w-5 h-5" />
               My Measurements
             </h3>
-            <p className="text-sm text-brand-muted mt-1">Click to view and edit</p>
+            <p className="text-sm text-brand-muted mt-1">
+              {measurements.length} measurements saved
+            </p>
           </div>
         </div>
       </Card>

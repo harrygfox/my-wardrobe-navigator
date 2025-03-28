@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import GarmentDetail from "./pages/GarmentDetail";
 import NotFound from "./pages/NotFound";
 import { UnitProvider } from "@/contexts/UnitContext";
+import { MeasurementProvider } from "@/contexts/MeasurementContext";
 import React from 'react'; // Explicitly importing React
 
 // Create a new QueryClient instance
@@ -16,13 +17,15 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter basename="/my-wardrobe-navigator">
       <UnitProvider>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/garment/:id" element={<GarmentDetail />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <MeasurementProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/garment/:id" element={<GarmentDetail />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </MeasurementProvider>
       </UnitProvider>
     </BrowserRouter>
   </QueryClientProvider>
