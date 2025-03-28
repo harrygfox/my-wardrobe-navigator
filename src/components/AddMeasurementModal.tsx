@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Measurement } from './MeasurementPanel';
+import { Measurement } from '@/contexts/MeasurementContext';
 import { X } from 'lucide-react';
 
 interface AddMeasurementModalProps {
