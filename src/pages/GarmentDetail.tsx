@@ -138,11 +138,22 @@ const GarmentDetail: React.FC = () => {
   };
 
   const handleToggleFitAssistant = (checked: boolean) => {
-    if (garment && isEditing) {
+    if (garment) {
       setGarment({
         ...garment,
         teachFitAssistant: checked
       });
+      
+      if (checked) {
+        toast({
+          title: "✅ Garment added to Fit Assistant. Your future size recommendations just got smarter."
+        });
+      } else {
+        toast({
+          title: "Fit Assistant Disabled",
+          description: "This garment will no longer influence your size recommendations."
+        });
+      }
     }
   };
 
@@ -284,7 +295,6 @@ const GarmentDetail: React.FC = () => {
                     id="fit-assistant-detail"
                     checked={garment.teachFitAssistant}
                     onCheckedChange={handleToggleFitAssistant}
-                    disabled={!isEditing}
                   />
                   <div>
                     <Label 

@@ -34,6 +34,7 @@ const GarmentList: React.FC<GarmentListProps> = ({
             garment={garment}
             onToggleFitAssistant={onToggleFitAssistant}
             onDelete={onDeleteGarment}
+            editLinkWithQueryParam={true} // Add this prop to enable edit mode navigation
           />
         ))}
         

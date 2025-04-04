@@ -1,16 +1,28 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Edit2, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MoreVertical, Trash2, Edit, BadgeCheck } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+export interface Measurements {
+  chest?: number;
+  waist?: number;
+  hip?: number;
+  shoulders?: number;
+  sleeves?: number;
+  length?: number;
+  width?: number;
+  comfort?: number;
+}
 
 export interface Garment {
   id: string;
@@ -20,44 +32,52 @@ export interface Garment {
   color: string;
   image: string;
   teachFitAssistant: boolean;
-  measurements: {
-    chest?: number;
-    waist?: number;
-    hip?: number;
-  };
+  measurements: Measurements;
 }
 
 interface GarmentCardProps {
   garment: Garment;
   onToggleFitAssistant: (id: string, value: boolean) => void;
   onDelete: (id: string) => void;
+  editLinkWithQueryParam?: boolean;
 }
 
 const GarmentCard: React.FC<GarmentCardProps> = ({
   garment,
   onToggleFitAssistant,
   onDelete,
+  editLinkWithQueryParam = false
 }) => {
+  const handleFitAssistantChange = (checked: boolean) => {
+    onToggleFitAssistant(garment.id, checked);
+  };
+
   return (
-    <Card className="overflow-hidden card-hover animate-scale-in">
+    <Card className="overflow-hidden h-full flex flex-col">
       <div className="relative">
         <Link to={`/garment/${garment.id}`}>
-          <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
-            <img
-              src={garment.image || 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=1205&auto=format&fit=crop'}
-              alt={garment.name}
-              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-            />
-          </div>
+          <AspectRatio ratio={3/4} className="bg-gray-100">
+            {garment.image ? (
+              <img 
+                src={garment.image} 
+                alt={garment.name}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-brand-muted">
+                No image
+              </div>
+            )}
+          </AspectRatio>
         </Link>
         
         {garment.teachFitAssistant && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge className="absolute top-3 right-3 bg-brand-accent/90 hover:bg-brand-accent">
-                  Fit Assistant
-                </Badge>
+                <div className="absolute top-2 right-2">
+                  <BadgeCheck className="h-5 w-5 text-brand-primary bg-white rounded-full p-0.5" />
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>This garment is shaping your fit preferences.</p>
@@ -65,50 +85,63 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
             </Tooltip>
           </TooltipProvider>
         )}
+        
+        <div className="absolute top-2 left-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="p-1.5 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors">
+              <MoreVertical className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem
+                className="flex items-center gap-2 text-sm cursor-pointer"
+                asChild
+              >
+                <Link to={editLinkWithQueryParam ? `/garment/${garment.id}?edit=true` : `/garment/${garment.id}`}>
+                  <Edit className="h-4 w-4" />
+                  <span>Edit</span>
+                </Link>
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem
+                className="flex items-center gap-2 text-sm text-red-600 focus:text-red-600 cursor-pointer"
+                onClick={() => onDelete(garment.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       
-      <CardContent className="p-4 space-y-3">
-        <div>
-          <div className="text-sm text-brand-muted">{garment.brand}</div>
-          <h3 className="font-medium text-lg leading-tight">{garment.name}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-sm text-brand-muted">{garment.size}</span>
-            <span className="text-brand-muted">•</span>
-            <span className="text-sm text-brand-muted">{garment.color}</span>
-          </div>
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex-1">
+          <Link to={`/garment/${garment.id}`} className="block">
+            <h3 className="font-medium line-clamp-1">{garment.name}</h3>
+            <p className="text-sm text-brand-muted line-clamp-1">{garment.brand}</p>
+          </Link>
         </div>
         
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Switch
-              id={`fit-toggle-${garment.id}`}
-              checked={garment.teachFitAssistant}
-              onCheckedChange={(checked) => onToggleFitAssistant(garment.id, checked)}
-            />
-            <label 
-              htmlFor={`fit-toggle-${garment.id}`} 
-              className="text-xs text-brand-muted cursor-pointer"
-            >
-              Teach Fit Assistant
-            </label>
+        <div className="flex justify-between items-center mt-4">
+          <div>
+            <p className="text-xs text-brand-muted">Size</p>
+            <p className="text-sm">{garment.size}</p>
           </div>
           
-          <div className="flex gap-1">
-            <Link 
-              to={`/garment/${garment.id}`}
-              className="p-1.5 rounded-md text-gray-500 hover:text-brand-primary hover:bg-gray-100 transition-colors"
-            >
-              <Edit2 className="w-4 h-4" />
-            </Link>
-            <button 
-              onClick={() => onDelete(garment.id)}
-              className="p-1.5 rounded-md text-gray-500 hover:text-red-500 hover:bg-gray-100 transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+          <div className="flex items-center gap-2">
+            <Switch
+              id={`fit-assistant-${garment.id}`}
+              checked={garment.teachFitAssistant}
+              onCheckedChange={handleFitAssistantChange}
+              size="sm"
+              className="data-[state=checked]:bg-brand-primary"
+            />
+            <label htmlFor={`fit-assistant-${garment.id}`} className="text-xs cursor-pointer">
+              Fit Assistant
+            </label>
           </div>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };
