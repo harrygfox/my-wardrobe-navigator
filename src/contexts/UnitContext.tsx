@@ -16,11 +16,28 @@ type UnitContextType = {
 
 const UnitContext = createContext<UnitContextType | undefined>(undefined);
 
+// Try to load saved preference from localStorage
+const getSavedUnitSystem = (): UnitSystem => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('unitSystem');
+    if (saved === 'metric' || saved === 'imperial') {
+      return saved;
+    }
+  }
+  return 'metric'; // Default to metric if no valid preference found
+};
+
 export const UnitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>(getSavedUnitSystem());
 
   const toggleUnitSystem = () => {
-    setUnitSystem(prevSystem => (prevSystem === 'metric' ? 'imperial' : 'metric'));
+    const newSystem = unitSystem === 'metric' ? 'imperial' : 'metric';
+    setUnitSystem(newSystem);
+    
+    // Save preference to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('unitSystem', newSystem);
+    }
   };
 
   // Conversion functions

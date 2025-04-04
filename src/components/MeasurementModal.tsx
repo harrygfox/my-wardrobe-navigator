@@ -3,11 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useUnit } from '@/contexts/UnitContext';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useMeasurements } from '@/contexts/MeasurementContext';
 import MeasurementList from './measurements/MeasurementList';
 import AddMeasurementButton from './measurements/AddMeasurementButton';
+import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
 type MeasurementModalProps = {
   isOpen: boolean;
@@ -49,22 +49,31 @@ const MeasurementModal: React.FC<MeasurementModalProps> = ({
         <DialogHeader>
           <DialogTitle className="font-heading text-2xl">My Measurements</DialogTitle>
           <div className="flex items-center space-x-2 mt-2">
-            <div className="flex items-center justify-between px-2 py-1 bg-gray-100 rounded-md">
-              <Label 
-                htmlFor="unit-toggle-modal" 
-                className={`text-sm px-3 py-1 rounded-md transition-colors ${unitSystem === 'metric' ? 'bg-white font-medium shadow-sm' : 'cursor-pointer hover:bg-gray-200'}`}
-                onClick={() => unitSystem === 'imperial' && toggleUnitSystem()}
+            <ToggleGroup 
+              type="single" 
+              value={unitSystem} 
+              onValueChange={(value) => {
+                if (value && (value === 'metric' || value === 'imperial')) {
+                  if (value !== unitSystem) {
+                    toggleUnitSystem();
+                  }
+                }
+              }}
+              className="bg-gray-100 p-1 rounded-md"
+            >
+              <ToggleGroupItem 
+                value="metric" 
+                className="text-sm px-4 py-1 data-[state=on]:bg-white data-[state=on]:shadow-sm"
               >
                 Metric
-              </Label>
-              <Label 
-                htmlFor="unit-toggle-modal" 
-                className={`text-sm px-3 py-1 rounded-md transition-colors ${unitSystem === 'imperial' ? 'bg-white font-medium shadow-sm' : 'cursor-pointer hover:bg-gray-200'}`}
-                onClick={() => unitSystem === 'metric' && toggleUnitSystem()}
+              </ToggleGroupItem>
+              <ToggleGroupItem 
+                value="imperial" 
+                className="text-sm px-4 py-1 data-[state=on]:bg-white data-[state=on]:shadow-sm"
               >
                 Imperial
-              </Label>
-            </div>
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
         </DialogHeader>
         

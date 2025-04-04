@@ -47,9 +47,15 @@ const FitSlider: React.FC<FitSliderProps> = ({
 
   const [localValue, setLocalValue] = useState<number>(value);
   
+  // Update local value when prop value changes
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
+  
+  // Update local value when unit system changes
+  useEffect(() => {
+    setLocalValue(value);
+  }, [unitSystem, value]);
 
   // Convert min, max, and value based on the measurement type and unit system
   const getConvertedRange = () => {
