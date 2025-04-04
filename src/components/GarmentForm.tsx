@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useUnit } from '@/contexts/UnitContext';
 import FitSlider from './FitSlider';
@@ -60,7 +59,6 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   useEffect(() => {
-    // Track if user has made any changes to the form
     setHasChanges(
       formData.name !== initialData.name ||
       formData.brand !== initialData.brand ||
@@ -72,15 +70,6 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
       formData.teachFitAssistant !== initialData.teachFitAssistant
     );
   }, [formData, initialData]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
 
   const handleFitPerceptionChange = (part: 'chest' | 'waist' | 'hip', value: string) => {
     setFormData(prev => ({
@@ -102,6 +91,15 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
     }));
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -121,7 +119,6 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
     if (!formData.name || !formData.brand || !formData.size || !formData.color) {
       toast({
         title: "Validation Error",
@@ -337,31 +334,48 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
             </button>
             
             {showFitPerception && showMeasurements && (
-              <div className="grid grid-cols-1 gap-4 p-4 border border-gray-100 rounded-lg bg-gray-50">
-                {['chest', 'waist', 'hip'].map((part) => (
-                  formData.measurements[part as keyof typeof formData.measurements] !== undefined && (
-                    <div key={part} className="space-y-2">
-                      <Label htmlFor={`fit-${part}`} className="capitalize text-sm">
-                        {part} Fit
-                      </Label>
-                      <Select
-                        value={formData.fitPerception[part as 'chest' | 'waist' | 'hip']}
-                        onValueChange={(value) => 
-                          handleFitPerceptionChange(part as 'chest' | 'waist' | 'hip', value)
-                        }
-                      >
-                        <SelectTrigger id={`fit-${part}`} className="input-field">
-                          <SelectValue placeholder={`Select ${part} fit`} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {fitOptions.map((option) => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )
-                ))}
+              <div className="space-y-5 p-4 border border-gray-100 rounded-lg bg-gray-50">
+                {formData.measurements.chest !== undefined && (
+                  <FitSlider
+                    label="Chest Fit"
+                    value={formData.measurements.chest}
+                    onChange={(value) => handleMeasurementChange('chest', value)}
+                    min={60}
+                    max={140}
+                    measurementType="measurement"
+                    isFitPerception={true}
+                    fitValue={formData.fitPerception.chest}
+                    onFitChange={(value) => handleFitPerceptionChange('chest', value)}
+                  />
+                )}
+                
+                {formData.measurements.waist !== undefined && (
+                  <FitSlider
+                    label="Waist Fit"
+                    value={formData.measurements.waist}
+                    onChange={(value) => handleMeasurementChange('waist', value)}
+                    min={50}
+                    max={140}
+                    measurementType="measurement"
+                    isFitPerception={true}
+                    fitValue={formData.fitPerception.waist}
+                    onFitChange={(value) => handleFitPerceptionChange('waist', value)}
+                  />
+                )}
+                
+                {formData.measurements.hip !== undefined && (
+                  <FitSlider
+                    label="Hip Fit"
+                    value={formData.measurements.hip}
+                    onChange={(value) => handleMeasurementChange('hip', value)}
+                    min={60}
+                    max={150}
+                    measurementType="measurement"
+                    isFitPerception={true}
+                    fitValue={formData.fitPerception.hip}
+                    onFitChange={(value) => handleFitPerceptionChange('hip', value)}
+                  />
+                )}
               </div>
             )}
           </div>

@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { useUnit, UnitSystem } from '@/contexts/UnitContext';
+import { useUnit } from '@/contexts/UnitContext';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { ThumbsUp, ThumbsDown, Check } from 'lucide-react';
 
 interface FitSliderProps {
   label: string;
@@ -13,6 +15,9 @@ interface FitSliderProps {
   step?: number;
   measurementType: 'height' | 'weight' | 'measurement';
   className?: string;
+  isFitPerception?: boolean;
+  fitValue?: string;
+  onFitChange?: (value: string) => void;
 }
 
 const FitSlider: React.FC<FitSliderProps> = ({
@@ -24,6 +29,9 @@ const FitSlider: React.FC<FitSliderProps> = ({
   step = 1,
   measurementType,
   className = '',
+  isFitPerception = false,
+  fitValue = 'Just Right',
+  onFitChange,
 }) => {
   const { 
     unitSystem, 
@@ -95,6 +103,12 @@ const FitSlider: React.FC<FitSliderProps> = ({
     }
   };
 
+  const handleFitChange = (value: string) => {
+    if (onFitChange) {
+      onFitChange(value);
+    }
+  };
+
   return (
     <div className={`space-y-3 ${className}`}>
       <div className="flex justify-between items-center">
@@ -105,15 +119,46 @@ const FitSlider: React.FC<FitSliderProps> = ({
           {formatValue()}
         </div>
       </div>
-      <Slider
-        id={`slider-${label}`}
-        min={convertedMin}
-        max={convertedMax}
-        step={step}
-        value={[convertedValue]}
-        onValueChange={handleChange}
-        className="py-2"
-      />
+      
+      {isFitPerception ? (
+        <ToggleGroup 
+          type="single"
+          value={fitValue}
+          onValueChange={(value) => {
+            if (value) handleFitChange(value);
+          }}
+          className="justify-between w-full border rounded-md p-1 bg-gray-50"
+        >
+          <ToggleGroupItem value="Very Loose" className="flex-1 text-xs">
+            <ThumbsDown className="h-4 w-4 mr-1" />
+            Very Loose
+          </ToggleGroupItem>
+          <ToggleGroupItem value="Loose" className="flex-1 text-xs">
+            Loose
+          </ToggleGroupItem>
+          <ToggleGroupItem value="Just Right" className="flex-1 text-xs">
+            <Check className="h-4 w-4 mr-1" />
+            Just Right
+          </ToggleGroupItem>
+          <ToggleGroupItem value="Snug" className="flex-1 text-xs">
+            Snug
+          </ToggleGroupItem>
+          <ToggleGroupItem value="Very Tight" className="flex-1 text-xs">
+            <ThumbsUp className="h-4 w-4 mr-1" />
+            Very Tight
+          </ToggleGroupItem>
+        </ToggleGroup>
+      ) : (
+        <Slider
+          id={`slider-${label}`}
+          min={convertedMin}
+          max={convertedMax}
+          step={step}
+          value={[convertedValue]}
+          onValueChange={handleChange}
+          className="py-2"
+        />
+      )}
     </div>
   );
 };
