@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import MeasurementCard from '@/components/MeasurementCard';
@@ -5,6 +6,7 @@ import GarmentList from '@/components/GarmentList';
 import { Garment } from '@/components/GarmentCard';
 import DeleteGarmentDialog from '@/components/DeleteGarmentDialog';
 import AddGarmentDialog from '@/components/AddGarmentDialog';
+import EmptyStateCloset from '@/components/EmptyStateCloset';
 import { useToast } from '@/hooks/use-toast';
 
 const initialGarments: Garment[] = [
@@ -65,6 +67,8 @@ const initialGarments: Garment[] = [
 ];
 
 const Index: React.FC = () => {
+  // For demo purposes, allow toggling between empty and populated state
+  const [showEmptyState, setShowEmptyState] = useState(false);
   const [garments, setGarments] = useState<Garment[]>(initialGarments);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [deleteGarmentId, setDeleteGarmentId] = useState<string | null>(null);
@@ -103,6 +107,11 @@ const Index: React.FC = () => {
         description: "The garment has been removed from your closet.",
       });
       setDeleteGarmentId(null);
+      
+      // If we deleted the last garment, show empty state
+      if (garments.length === 1) {
+        setShowEmptyState(true);
+      }
     }
   };
 
@@ -124,6 +133,7 @@ const Index: React.FC = () => {
 
     setGarments(prev => [newGarment, ...prev]);
     setIsAddDialogOpen(false);
+    setShowEmptyState(false);
     
     toast({
       title: "Garment Added",
@@ -136,24 +146,42 @@ const Index: React.FC = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-screen-lg mx-auto">
-          <section className="mb-12 animate-fade-in">
-            <h1 className="font-heading text-4xl md:text-5xl mb-2">My Closet</h1>
-            <p className="text-brand-muted max-w-2xl">
-              Track your garments, record measurements, and improve your size recommendations with Fit Assistant.
-            </p>
-          </section>
+        <div className="max-w-screen-xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <section className="lg:col-span-2 animate-fade-in">
+              <h1 className="font-heading text-4xl md:text-5xl mb-2">My Closet</h1>
+              <p className="text-brand-muted max-w-2xl">
+                Track your garments, record measurements, and improve your size recommendations with Fit Assistant.
+              </p>
+            </section>
+            
+            <section className="lg:col-span-1">
+              <div className="max-w-xs mx-auto lg:mx-0">
+                <MeasurementCard />
+              </div>
+            </section>
+          </div>
           
-          <section className="mb-8 max-w-xs mx-auto">
-            <MeasurementCard />
-          </section>
+          {showEmptyState || garments.length === 0 ? (
+            <EmptyStateCloset onAddGarment={() => setIsAddDialogOpen(true)} />
+          ) : (
+            <GarmentList 
+              garments={garments}
+              onToggleFitAssistant={handleToggleFitAssistant}
+              onDeleteGarment={handleDeleteGarment}
+              onAddGarmentClick={() => setIsAddDialogOpen(true)}
+            />
+          )}
           
-          <GarmentList 
-            garments={garments}
-            onToggleFitAssistant={handleToggleFitAssistant}
-            onDeleteGarment={handleDeleteGarment}
-            onAddGarmentClick={() => setIsAddDialogOpen(true)}
-          />
+          {/* For demo purposes - toggle empty state */}
+          <div className="mt-8 text-center">
+            <button 
+              onClick={() => setShowEmptyState(!showEmptyState)}
+              className="text-sm text-gray-500 underline"
+            >
+              Toggle Empty State Demo
+            </button>
+          </div>
         </div>
       </main>
       
