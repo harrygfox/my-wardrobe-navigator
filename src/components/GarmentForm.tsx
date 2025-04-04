@@ -356,15 +356,21 @@ const GarmentForm: React.FC<GarmentFormProps> = ({
         return (
           <div className="space-y-6 animate-fade-in">
             <div className="flex justify-end">
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="unit-toggle-form" className="text-sm text-brand-muted">
-                  {unitSystem === 'metric' ? 'Metric' : 'Imperial'}
+              <div className="flex items-center bg-gray-100 rounded-md px-2 py-1">
+                <Label 
+                  htmlFor="unit-toggle-form"
+                  className={`text-sm px-3 py-1 rounded-md transition-colors ${unitSystem === 'metric' ? 'bg-white font-medium shadow-sm' : 'cursor-pointer hover:bg-gray-200'}`}
+                  onClick={() => unitSystem === 'imperial' && toggleUnitSystem()}
+                >
+                  Metric
                 </Label>
-                <Switch
-                  id="unit-toggle-form"
-                  checked={unitSystem === 'imperial'}
-                  onCheckedChange={toggleUnitSystem}
-                />
+                <Label 
+                  htmlFor="unit-toggle-form"
+                  className={`text-sm px-3 py-1 rounded-md transition-colors ${unitSystem === 'imperial' ? 'bg-white font-medium shadow-sm' : 'cursor-pointer hover:bg-gray-200'}`}
+                  onClick={() => unitSystem === 'metric' && toggleUnitSystem()}
+                >
+                  Imperial
+                </Label>
               </div>
             </div>
           

@@ -49,14 +49,22 @@ const MeasurementModal: React.FC<MeasurementModalProps> = ({
         <DialogHeader>
           <DialogTitle className="font-heading text-2xl">My Measurements</DialogTitle>
           <div className="flex items-center space-x-2 mt-2">
-            <Label htmlFor="unit-toggle-modal" className="text-sm text-brand-muted">
-              {unitSystem === 'metric' ? 'Metric' : 'Imperial'}
-            </Label>
-            <Switch
-              id="unit-toggle-modal"
-              checked={unitSystem === 'imperial'}
-              onCheckedChange={toggleUnitSystem}
-            />
+            <div className="flex items-center justify-between px-2 py-1 bg-gray-100 rounded-md">
+              <Label 
+                htmlFor="unit-toggle-modal" 
+                className={`text-sm px-3 py-1 rounded-md transition-colors ${unitSystem === 'metric' ? 'bg-white font-medium shadow-sm' : 'cursor-pointer hover:bg-gray-200'}`}
+                onClick={() => unitSystem === 'imperial' && toggleUnitSystem()}
+              >
+                Metric
+              </Label>
+              <Label 
+                htmlFor="unit-toggle-modal" 
+                className={`text-sm px-3 py-1 rounded-md transition-colors ${unitSystem === 'imperial' ? 'bg-white font-medium shadow-sm' : 'cursor-pointer hover:bg-gray-200'}`}
+                onClick={() => unitSystem === 'metric' && toggleUnitSystem()}
+              >
+                Imperial
+              </Label>
+            </div>
           </div>
         </DialogHeader>
         
