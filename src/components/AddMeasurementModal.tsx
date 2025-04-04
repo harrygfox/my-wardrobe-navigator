@@ -52,24 +52,30 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
             Select additional measurements to track for better fit recommendations.
           </p>
           
-          <div className="space-y-4">
-            {availableMeasurements.map((measurement) => (
-              <div key={measurement.id} className="flex items-center space-x-3">
-                <Checkbox
-                  id={`checkbox-${measurement.id}`}
-                  checked={selectedIds.includes(measurement.id)}
-                  onCheckedChange={(checked) => 
-                    handleCheckboxChange(measurement.id, checked as boolean)
-                  }
-                />
-                <Label
-                  htmlFor={`checkbox-${measurement.id}`}
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  {measurement.name}
-                </Label>
-              </div>
-            ))}
+          <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
+            {availableMeasurements.length > 0 ? (
+              availableMeasurements.map((measurement) => (
+                <div key={measurement.id} className="flex items-center space-x-3">
+                  <Checkbox
+                    id={`checkbox-${measurement.id}`}
+                    checked={selectedIds.includes(measurement.id)}
+                    onCheckedChange={(checked) => 
+                      handleCheckboxChange(measurement.id, checked as boolean)
+                    }
+                  />
+                  <Label
+                    htmlFor={`checkbox-${measurement.id}`}
+                    className="text-sm font-medium cursor-pointer"
+                  >
+                    {measurement.name}
+                  </Label>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground py-4">
+                All available measurements have already been added.
+              </p>
+            )}
           </div>
         </div>
         
