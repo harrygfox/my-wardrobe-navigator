@@ -15,7 +15,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <BrowserRouter basename="/my-wardrobe-navigator">
+    <BrowserRouter>
       <UnitProvider>
         <MeasurementProvider>
           <Toaster />
