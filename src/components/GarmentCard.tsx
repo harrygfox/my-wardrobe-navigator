@@ -133,7 +133,6 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
               id={`fit-assistant-${garment.id}`}
               checked={garment.teachFitAssistant}
               onCheckedChange={handleFitAssistantChange}
-              size="sm"
               className="data-[state=checked]:bg-brand-primary"
             />
             <label htmlFor={`fit-assistant-${garment.id}`} className="text-xs cursor-pointer">
