@@ -294,7 +294,7 @@ const GarmentDetail: React.FC = () => {
                       Teach Fit Assistant
                     </Label>
                     <p className="text-xs text-brand-muted mt-1">
-                      Fit Assistant learns from this garment to improve your size recommendations.
+                      Turn this on to teach Fit Assistant what fits you best. You'll get smarter size guidance from your wardrobe and the store.
                     </p>
                   </div>
                 </div>

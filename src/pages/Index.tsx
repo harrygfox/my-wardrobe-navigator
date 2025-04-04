@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import MeasurementCard from '@/components/MeasurementCard';
@@ -80,10 +79,16 @@ const Index: React.FC = () => {
       )
     );
 
-    toast({
-      title: `Fit Assistant ${value ? 'Enabled' : 'Disabled'}`,
-      description: `This garment will ${value ? 'now' : 'no longer'} influence size recommendations.`,
-    });
+    if (value) {
+      toast({
+        title: "✅ Garment added to Fit Assistant. Your future size recommendations just got smarter."
+      });
+    } else {
+      toast({
+        title: "Fit Assistant Disabled",
+        description: "This garment will no longer influence your size recommendations."
+      });
+    }
   };
 
   const handleDeleteGarment = (id: string) => {

@@ -18,6 +18,7 @@ interface FitSliderProps {
   isFitPerception?: boolean;
   fitValue?: string;
   onFitChange?: (value: string) => void;
+  showExplainer?: boolean;
 }
 
 const FitSlider: React.FC<FitSliderProps> = ({
@@ -32,6 +33,7 @@ const FitSlider: React.FC<FitSliderProps> = ({
   isFitPerception = false,
   fitValue = 'Just Right',
   onFitChange,
+  showExplainer = true,
 }) => {
   const { 
     unitSystem, 
@@ -121,33 +123,40 @@ const FitSlider: React.FC<FitSliderProps> = ({
       </div>
       
       {isFitPerception ? (
-        <ToggleGroup 
-          type="single"
-          value={fitValue}
-          onValueChange={(value) => {
-            if (value) handleFitChange(value);
-          }}
-          className="justify-between w-full border rounded-md p-1 bg-gray-50"
-        >
-          <ToggleGroupItem value="Very Loose" className="flex-1 text-xs">
-            <ThumbsDown className="h-4 w-4 mr-1" />
-            Very Loose
-          </ToggleGroupItem>
-          <ToggleGroupItem value="Loose" className="flex-1 text-xs">
-            Loose
-          </ToggleGroupItem>
-          <ToggleGroupItem value="Just Right" className="flex-1 text-xs">
-            <Check className="h-4 w-4 mr-1" />
-            Just Right
-          </ToggleGroupItem>
-          <ToggleGroupItem value="Snug" className="flex-1 text-xs">
-            Snug
-          </ToggleGroupItem>
-          <ToggleGroupItem value="Very Tight" className="flex-1 text-xs">
-            <ThumbsUp className="h-4 w-4 mr-1" />
-            Very Tight
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <>
+          <ToggleGroup 
+            type="single"
+            value={fitValue}
+            onValueChange={(value) => {
+              if (value) handleFitChange(value);
+            }}
+            className="justify-between w-full border rounded-md p-1 bg-gray-50"
+          >
+            <ToggleGroupItem value="Very Loose" className="flex-1 text-xs">
+              <ThumbsDown className="h-4 w-4 mr-1" />
+              Very Loose
+            </ToggleGroupItem>
+            <ToggleGroupItem value="Loose" className="flex-1 text-xs">
+              Loose
+            </ToggleGroupItem>
+            <ToggleGroupItem value="Just Right" className="flex-1 text-xs">
+              <Check className="h-4 w-4 mr-1" />
+              Just Right
+            </ToggleGroupItem>
+            <ToggleGroupItem value="Snug" className="flex-1 text-xs">
+              Snug
+            </ToggleGroupItem>
+            <ToggleGroupItem value="Very Tight" className="flex-1 text-xs">
+              <ThumbsUp className="h-4 w-4 mr-1" />
+              Very Tight
+            </ToggleGroupItem>
+          </ToggleGroup>
+          {showExplainer && (
+            <p className="text-xs text-brand-muted mt-1">
+              Your fit perception helps tailor future size recommendations.
+            </p>
+          )}
+        </>
       ) : (
         <Slider
           id={`slider-${label}`}

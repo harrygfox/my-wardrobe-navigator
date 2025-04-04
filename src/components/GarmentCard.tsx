@@ -1,10 +1,15 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Edit2, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export interface Garment {
   id: string;
@@ -46,9 +51,18 @@ const GarmentCard: React.FC<GarmentCardProps> = ({
         </Link>
         
         {garment.teachFitAssistant && (
-          <Badge className="absolute top-3 right-3 bg-brand-accent/90 hover:bg-brand-accent">
-            Fit Assistant
-          </Badge>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge className="absolute top-3 right-3 bg-brand-accent/90 hover:bg-brand-accent">
+                  Fit Assistant
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>This garment is shaping your fit preferences.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
       
