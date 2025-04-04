@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Header from '@/components/Header';
 import MeasurementCard from '@/components/MeasurementCard';
 import GarmentList from '@/components/GarmentList';
@@ -67,12 +66,15 @@ const initialGarments: Garment[] = [
 ];
 
 const Index: React.FC = () => {
-  // For demo purposes, allow toggling between empty and populated state
   const [showEmptyState, setShowEmptyState] = useState(false);
   const [garments, setGarments] = useState<Garment[]>(initialGarments);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [deleteGarmentId, setDeleteGarmentId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const fitAssistantCount = useMemo(() => {
+    return garments.filter(g => g.teachFitAssistant).length;
+  }, [garments]);
 
   const handleToggleFitAssistant = (id: string, value: boolean) => {
     setGarments(prev =>
@@ -108,7 +110,6 @@ const Index: React.FC = () => {
       });
       setDeleteGarmentId(null);
       
-      // If we deleted the last garment, show empty state
       if (garments.length === 1) {
         setShowEmptyState(true);
       }
@@ -163,7 +164,10 @@ const Index: React.FC = () => {
           </div>
           
           {showEmptyState || garments.length === 0 ? (
-            <EmptyStateCloset onAddGarment={() => setIsAddDialogOpen(true)} />
+            <EmptyStateCloset 
+              onAddGarment={() => setIsAddDialogOpen(true)} 
+              fitAssistantCount={fitAssistantCount}
+            />
           ) : (
             <GarmentList 
               garments={garments}
@@ -173,7 +177,6 @@ const Index: React.FC = () => {
             />
           )}
           
-          {/* For demo purposes - toggle empty state */}
           <div className="mt-8 text-center">
             <button 
               onClick={() => setShowEmptyState(!showEmptyState)}

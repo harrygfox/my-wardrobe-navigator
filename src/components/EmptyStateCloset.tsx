@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 
 interface EmptyStateClosetProps {
   onAddGarment: () => void;
+  fitAssistantCount?: number;
 }
 
 const placeholders = [
@@ -13,7 +14,10 @@ const placeholders = [
   "Your closet's first hero"
 ];
 
-const EmptyStateCloset: React.FC<EmptyStateClosetProps> = ({ onAddGarment }) => {
+const EmptyStateCloset: React.FC<EmptyStateClosetProps> = ({ 
+  onAddGarment,
+  fitAssistantCount = 0
+}) => {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center animate-fade-in">
       <div className="max-w-md mx-auto">
@@ -47,7 +51,8 @@ const EmptyStateCloset: React.FC<EmptyStateClosetProps> = ({ onAddGarment }) => 
         
         <div className="mt-10 p-4 bg-gray-50 rounded-lg">
           <p className="text-sm text-brand-muted">
-            0 garments teaching Fit Assistant. Add one to start improving your recommendations.
+            {fitAssistantCount} {fitAssistantCount === 1 ? 'garment' : 'garments'} teaching Fit Assistant. 
+            {fitAssistantCount === 0 && ' Add one to start improving your recommendations.'}
           </p>
         </div>
       </div>
